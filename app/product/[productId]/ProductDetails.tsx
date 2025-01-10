@@ -4,6 +4,7 @@ import Button from "@/app/components/Button";
 import ProductImage from "@/app/components/products/ProductImage";
 import SetColor from "@/app/components/products/SetColor";
 import SetQuantity from "@/app/components/products/SetQuantity";
+import { useCart } from "@/hooks/useCart";
 import { Rating } from "@mui/material";
 import { useCallback, useState } from "react";
 
@@ -32,6 +33,8 @@ export type selectedImgType = {
 };
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
+  const { cartTotalQty } = useCart();
+
   const [cartProduct, setCartProduct] = useState<CartProductType>({
     id: product.id,
     name: product.name,
@@ -43,7 +46,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     price: product.price,
   });
 
-  console.log(cartProduct);
+  console.log(cartTotalQty);
 
   const productRating =
     product.reviews.reduce((acc: number, item: any) => item.rating + acc, 0) /
@@ -94,11 +97,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         <div className="text-justify">{product.description}</div>
         <Horizontal />
         <div>
-          <span className="font-semibold">CATEGPORY </span>
+          <span className="font-semibold">CATEGPORY: </span>
           {product.category}
         </div>
         <div>
-          <span className="font-semibold">BRAND </span>
+          <span className="font-semibold">BRAND: </span>
           {product.brand}
         </div>
         <div className={product.inStock ? "text-teal-400" : "text-rose-400"}>
