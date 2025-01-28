@@ -6,7 +6,9 @@ import SetColor from "@/app/components/products/SetColor";
 import SetQuantity from "@/app/components/products/SetQuantity";
 import { useCart } from "@/hooks/useCart";
 import { Rating } from "@mui/material";
-import { useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { MdCheckCircle } from "react-icons/md";
 
 interface ProductDetailsProps {
   product: any;
@@ -33,6 +35,9 @@ export type selectedImgType = {
 };
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
+  const { handleAddProductToCart, cartProducts } = useCart();
+  const [isProductInCart, setIsProductInCart] = useState(false);
+
   const { cartTotalQty } = useCart();
 
   const [cartProduct, setCartProduct] = useState<CartProductType>({
@@ -46,7 +51,23 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     price: product.price,
   });
 
-  console.log(cartTotalQty);
+  const router = useRouter();
+
+  console.log(cartProducts);
+
+  useEffect(() => {
+    setIsProductInCart(false);
+
+    if (cartProducts) {
+      const existingIndex = cartProducts.findIndex(
+        (item) => item.id === product.id
+      );
+
+      if (existingIndex > -1) {
+        setIsProductInCart(true);
+      }
+    }
+  }, [cartProducts]);
 
   const productRating =
     product.reviews.reduce((acc: number, item: any) => item.rating + acc, 0) /
@@ -60,18 +81,23 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
   );
 
   const handleQuantityIncrease = useCallback(() => {
-    if (cartProduct.quantity === product.stock) {
+    if (cartProduct.quantity === 99) {
       return;
     }
 
-    setCartProduct((prev) => ({ ...prev, quantity: prev.quantity + 1 }));
+    setCartProduct((prev) => {
+      return { ...prev, quantity: ++prev.quantity };
+    });
   }, [cartProduct]);
+
   const handleQuantityDecrease = useCallback(() => {
     if (cartProduct.quantity === 1) {
       return;
     }
 
-    setCartProduct((prev) => ({ ...prev, quantity: prev.quantity - 1 }));
+    setCartProduct((prev) => {
+      return { ...prev, quantity: --prev.quantity };
+    });
   }, [cartProduct]);
 
   return (
@@ -105,28 +131,48 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
           {product.brand}
         </div>
         <div className={product.inStock ? "text-teal-400" : "text-rose-400"}>
-          {product.stock ? "in stock" : "out of stock"}
+          {product.inStock ? "in stock" : "out of stock"}
         </div>
         <Horizontal />
-        <SetColor
-          cartProduct={cartProduct}
-          images={product.images}
-          handleColorSelected={handleColorSelected}
-        />
-        <Horizontal />
-        <SetQuantity
-          cartProduct={cartProduct}
-          handleQuantityIncrease={handleQuantityIncrease}
-          handleQuantityDecrease={handleQuantityDecrease}
-        />
-        <Horizontal />
-        <div className="max-w-[300px]">
-          <Button
-            label="Add To Cart"
-            onclick={() => console.log(cartProduct)}
-            outline
-          />
-        </div>
+        {isProductInCart ? (
+          <>
+            <p className="mb-2 text-slate-500 flex items-center gap-1">
+              <MdCheckCircle size={20} className="text-teal-400" />
+              <span>Product added successfully</span>
+            </p>
+            <div className="max-w-[300px]">
+              <Button
+                label="View Cart"
+                outline
+                onclick={() => {
+                  router.push("/cart");
+                }}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <SetColor
+              cartProduct={cartProduct}
+              images={product.images}
+              handleColorSelected={handleColorSelected}
+            />
+            <Horizontal />
+            <SetQuantity
+              cartProduct={cartProduct}
+              handleQuantityIncrease={handleQuantityIncrease}
+              handleQuantityDecrease={handleQuantityDecrease}
+            />
+            <Horizontal />
+            <div className="max-w-[300px]">
+              <Button
+                label="Add To Cart"
+                onclick={() => handleAddProductToCart(cartProduct)}
+              />
+            </div>
+          </>
+        )}
+
         <Horizontal />
       </div>
     </div>
