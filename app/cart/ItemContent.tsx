@@ -5,11 +5,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { truncateText } from "@/utils/truncateText";
 import SetQuantity from "../components/products/SetQuantity";
+import { useCart } from "@/hooks/useCart";
 
 interface itemContentProps {
   item: CartProductType;
 }
 const ItemContent: React.FC<itemContentProps> = ({ item }) => {
+  const { handleRemoveProductFromCart } = useCart();
+  const { handleQtyIncrease } = useCart();
+  const { handleQtyDecrease } = useCart();
   return (
     <div
       className="
@@ -41,7 +45,10 @@ const ItemContent: React.FC<itemContentProps> = ({ item }) => {
         </div>
         <div>{item.selectedImg.color}</div>
         <div className="w-[70px] ">
-          <button className="text-slate-500 underline" onClick={() => {}}>
+          <button
+            className="text-slate-500 underline"
+            onClick={() => handleRemoveProductFromCart(item)}
+          >
             Remove
           </button>
         </div>
@@ -51,8 +58,8 @@ const ItemContent: React.FC<itemContentProps> = ({ item }) => {
         <SetQuantity
           cartCounter={true}
           cartProduct={item}
-          handleQuantityIncrease={() => {}}
-          handleQuantityDecrease={() => {}}
+          handleQuantityIncrease={() => handleQtyIncrease(item)}
+          handleQuantityDecrease={() => handleQtyDecrease(item)}
         />
       </div>
       <div className="justify-self-end font-semibold">
